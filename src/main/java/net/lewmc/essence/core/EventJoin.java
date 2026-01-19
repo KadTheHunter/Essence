@@ -1,5 +1,6 @@
 package net.lewmc.essence.core;
 
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.lewmc.essence.Essence;
 import net.lewmc.essence.kit.UtilKit;
 import net.lewmc.essence.teleportation.tp.UtilTeleport;
@@ -106,7 +107,7 @@ public class EventJoin implements Listener {
             String message = plugin.config.get("chat.motd").toString();
             if (message != null) {
                 UtilPlaceholder tag = new UtilPlaceholder(plugin, event.getPlayer());
-                event.getPlayer().sendMessage(tag.replaceAll(message));
+                event.getPlayer().sendMessage(tag.replaceAll(MiniMessage.miniMessage().deserialize(message)));
             }
         }
     }
@@ -119,11 +120,11 @@ public class EventJoin implements Listener {
         UtilPlaceholder tag = new UtilPlaceholder(this.plugin, event.getPlayer());
         if (event.getPlayer().hasPlayedBefore()) {
             if (this.plugin.config.get("chat.broadcasts.join") instanceof String) {
-                event.setJoinMessage(tag.replaceAll((String) this.plugin.config.get("chat.broadcasts.join")));
+                event.joinMessage(tag.replaceAll(MiniMessage.miniMessage().deserialize((String) this.plugin.config.get("chat.broadcasts.join"))));
             }
         } else {
             if (this.plugin.config.get("chat.broadcasts.first-join") instanceof String) {
-                event.setJoinMessage(tag.replaceAll((String) this.plugin.config.get("chat.broadcasts.first-join")));
+                event.joinMessage(tag.replaceAll(MiniMessage.miniMessage().deserialize((String) this.plugin.config.get("chat.broadcasts.first-join"))));
             }
         }
     }

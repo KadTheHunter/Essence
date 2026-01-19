@@ -80,10 +80,12 @@ public class CommandEssence extends FoundryCommand {
         UtilPermission perms = new UtilPermission(this.plugin, cs);
         if (perms.has("essence.admin.restore")) {
             this.plugin.saveResource("language/en-GB.yml", true);
-            this.plugin.saveResource("language/zh-CN.yml", true);
-            this.plugin.saveResource("language/fr-FR.yml", true);
             this.plugin.saveResource("language/es-ES.yml", true);
+            this.plugin.saveResource("language/fr-FR.yml", true);
             this.plugin.saveResource("language/ko-KR.yml", true);
+            this.plugin.saveResource("language/nl-NL.yml", true);
+            this.plugin.saveResource("language/pl-PL.yml", true);
+            this.plugin.saveResource("language/zh-CN.yml", true);
             message.send("generic","done");
             return true;
         } else {

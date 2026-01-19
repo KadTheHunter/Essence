@@ -1,12 +1,19 @@
 package net.lewmc.essence.core;
 
+import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.lewmc.essence.Essence;
 import net.lewmc.essence.team.UtilTeam;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
@@ -15,6 +22,11 @@ import java.util.Objects;
 public class UtilPlaceholder {
     private final Essence plugin;
     private final CommandSender cs;
+
+    private static final String MC_VERSION = Bukkit.getBukkitVersion().split("-")[0];
+    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     /**
      * Constructor
@@ -27,34 +39,19 @@ public class UtilPlaceholder {
 
     /**
      * Replaces tags with preconfigured text. This is used to search for and replace multiple placeholders at a time.
-     * @param text String - Text to search and replace.
-     * @return String - Resulting String
+     * @param text Component - Text to search and replace.
+     * @return Component - Resulting String
      */
-    public String replaceAll(String text) {
+    public Component replaceAll(Component text) {
         if (this.plugin.integrations.PAPIEnabled) {
-            if (this.cs instanceof Player) {
-                return new UtilPlaceholderAPI().invokePAPI((Player) this.cs, text);
-            } else {
-                return new UtilPlaceholderAPI().invokePAPI(null, text);
-            }
-        } else {
-            text = text.replace("%essence_version%", this.replaceSingle("version"));
-            text = text.replace("%essence_minecraft_version%", this.replaceSingle("minecraft_version"));
-            text = text.replace("%essence_time%", this.replaceSingle("time"));
-            text = text.replace("%essence_date%", this.replaceSingle("date"));
-            text = text.replace("%essence_datetime%", this.replaceSingle("datetime"));
-            text = text.replace("%essence_player%", this.replaceSingle("player"));
-            text = text.replace("%essence_username%", this.replaceSingle("username"));
-            text = text.replace("%essence_team%", this.replaceSingle("team_name"));
-            text = text.replace("%essence_team_name%", this.replaceSingle("team_name"));
-            text = text.replace("%essence_team_leader%", this.replaceSingle("team_leader"));
-            text = text.replace("%essence_team_prefix%", this.replaceSingle("team_prefix"));
-            text = text.replace("%essence_combined_prefix%", this.replaceSingle("combined_prefix"));
-            text = text.replace("%essence_player_prefix%", this.replaceSingle("player_prefix"));
-            text = text.replace("%essence_player_suffix%", this.replaceSingle("player_suffix"));
-            text = text.replace("%essence_balance%", this.replaceSingle("balance"));
+            return this.invokePAPI(this.cs instanceof Player p ? p : null, text);
         }
 
+        String[] keys = {"version", "minecraft_version", "time", "date", "datetime", "player", "username", "team", "team_name", "team_leader", "team_prefix", "combined_prefix", "player_prefix", "player_suffix", "balance"};
+        for (String key : keys) {
+            String placeholder = "%essence_" + key + "%";
+            text = text.replaceText(b -> b.matchLiteral(placeholder).replacement(this.replaceSingle(key)));
+        }
         return text;
     }
 
@@ -64,56 +61,39 @@ public class UtilPlaceholder {
      * @return String - The string the placeholder becomes.
      */
     public String replaceSingle(String placeholder) {
-        UtilTeam tu = new UtilTeam(this.plugin, new UtilMessage(this.plugin, this.cs));
+        return switch (placeholder.toLowerCase()) {
+            case "version" -> this.plugin.getDescription().getVersion();
+            case "minecraft_version" -> MC_VERSION;
+            case "time" -> LocalTime.now().format(TIME_FMT);
+            case "date" -> LocalDate.now().format(DATE_FMT);
+            case "datetime" -> LocalDateTime.now().format(DT_FMT);
+            case "username" -> cs.getName();
+            case "player" -> (boolean) this.plugin.config.get("chat.manage-chat") ? new UtilPlayer(this.plugin).getDisplayname(this.cs) : cs.getName();
+            case "team_name", "team_leader", "team_prefix" -> {
+                UtilTeam tu = new UtilTeam(this.plugin, new UtilMessage(this.plugin, this.cs));
+                if (placeholder.equals("team_prefix")) yield tu.getTeamPrefix(this.cs);
+                yield (this.cs instanceof Player p)
+                        ? (placeholder.equals("team_name") ? Objects.requireNonNullElse(tu.getPlayerTeam(p.getUniqueId()), "No team") : Objects.requireNonNullElse(tu.getTeamLeader(tu.getPlayerTeam(p.getUniqueId())), "No leader"))
+                        : (placeholder.equals("team_name") ? "No team" : "No leader");
+            }
+            case "player_prefix" -> new UtilPlayer(this.plugin).getPlayerPrefix(this.cs);
+            case "player_suffix" -> new UtilPlayer(this.plugin).getPlayerSuffix(this.cs);
+            case "combined_prefix" -> new UtilPlayer(this.plugin).getPlayerPrefix(cs) + new UtilTeam(this.plugin, new UtilMessage(this.plugin, this.cs)).getTeamPrefix(this.cs);
+            case "balance" -> {
+                String symbol = this.plugin.config.get("economy.symbol").toString();
+                yield (this.cs instanceof Player p) ? symbol + new UtilPlayer(this.plugin).getPlayer(p.getUniqueId(), UtilPlayer.KEYS.ECONOMY_BALANCE) : symbol + "Infinity";
+            }
+            default -> placeholder;
+        };
+    }
 
-        if (placeholder.equalsIgnoreCase("version")) {
-            return this.plugin.getDescription().getVersion();
-        } else if (placeholder.equalsIgnoreCase("minecraft_version")) {
-            String mcVersion = this.plugin.getServer().getBukkitVersion();
-            String[] mcVersionArray = mcVersion.split("-");
-            return mcVersionArray[0];
-        } else if (placeholder.equalsIgnoreCase("time")) {
-            return new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
-        } else if (placeholder.equalsIgnoreCase("date")) {
-            return new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
-        } else if (placeholder.equalsIgnoreCase("datetime")) {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().getTime());
-        } else if (placeholder.equalsIgnoreCase("player")) {
-            if ((boolean) this.plugin.config.get("chat.manage-chat")) {
-                return new UtilPlayer(this.plugin).getDisplayname(this.cs);
-            } else {
-                return cs.getName();
-            }
-        } else if (placeholder.equalsIgnoreCase("username")) {
-            return cs.getName();
-        } else if (placeholder.equalsIgnoreCase("team_name")) {
-            if (this.cs instanceof Player p) {
-                return Objects.requireNonNullElse(tu.getPlayerTeam(p.getUniqueId()), "No team");
-            } else {
-                return "No team";
-            }
-        } else if (placeholder.equalsIgnoreCase("team_leader")) {
-            if (this.cs instanceof Player p) {
-                return Objects.requireNonNullElse(tu.getTeamLeader(tu.getPlayerTeam(p.getUniqueId())), "No leader");
-            } else {
-                return "No leader";
-            }
-        } else if (placeholder.equalsIgnoreCase("team_prefix")) {
-            return tu.getTeamPrefix(this.cs);
-        } else if (placeholder.equalsIgnoreCase("combined_prefix")) {
-            return new UtilPlayer(this.plugin).getPlayerPrefix(cs) + tu.getTeamPrefix(this.cs);
-        } else if (placeholder.equalsIgnoreCase("player_prefix")) {
-            return new UtilPlayer(this.plugin).getPlayerPrefix(cs);
-        } else if (placeholder.equalsIgnoreCase("player_suffix")) {
-            return new UtilPlayer(this.plugin).getPlayerSuffix(cs);
-        } else if (placeholder.equalsIgnoreCase("balance")) {
-            if (cs instanceof Player p) {
-                return this.plugin.config.get("economy.symbol").toString() + new UtilPlayer(this.plugin).getPlayer(p.getUniqueId(), UtilPlayer.KEYS.ECONOMY_BALANCE);
-            } else {
-                return this.plugin.config.get("economy.symbol").toString() + "Infinity";
-            }
-        } else {
-            return placeholder;
-        }
+    /**
+     * Invokes PlaceholderAPI.
+     * @param player Player - The player who invoked PAPI.
+     * @param text Component - The text to translate placeholders for.
+     * @return Component - The translated text.
+     */
+    public Component invokePAPI(Player player, Component text) {
+        return MiniMessage.miniMessage().deserialize(PlaceholderAPI.setPlaceholders(player, PlainTextComponentSerializer.plainText().serialize(text)));
     }
 }

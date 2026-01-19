@@ -9,7 +9,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -123,67 +125,41 @@ public class UtilUpdate {
     /**
      * Updates Essence's language files.
      */
-    public void UpdateLanguage() {
+    public void UpdateLanguages() {
         // WHEN ADDING MORE HERE, ALSO PUT IN COMMANDESSENCE.RESTORE.
+        this.updateLanguage("en-GB");
+        this.updateLanguage("es-ES");
+        this.updateLanguage("fr-FR");
+        this.updateLanguage("ko-KR");
+        this.updateLanguage("nl-NL");
+        this.updateLanguage("pl-PL");
+        this.updateLanguage("zh-CN");
+    }
 
-        // en-GB
-        File enGB = new File(this.plugin.getDataFolder() + File.separator + "language" + File.separator + "en-GB.yml");
-        if (!enGB.exists()) {
-            this.plugin.saveResource("language/en-GB.yml", true);
-        } else {
-            try {
-                ConfigUpdater.update(plugin, "language/en-GB.yml", enGB);
-            } catch (IOException e) {
-                this.log.warn("Unable to update en-GB language file: "+e);
-            }
+    /**
+     * Updates Essence's language files.
+     * @param language String - The language file to update.
+     */
+    public void updateLanguage(String language) {
+        String resourcePath = "language/" + language + ".yml";
+        File langFile = new File(this.plugin.getDataFolder(), resourcePath.replace("/", File.separator));
+
+        if (!langFile.exists()) {
+            this.plugin.saveResource(resourcePath, true);
+            return;
         }
 
-        // zh-CN
-        File zhCN = new File(this.plugin.getDataFolder() + File.separator + "language" + File.separator + "zh-CN.yml");
-        if (!zhCN.exists()) {
-            this.plugin.saveResource("language/zh-CN.yml", true);
-        } else {
-            try {
-                ConfigUpdater.update(plugin, "language/zh-CN.yml", zhCN);
-            } catch (IOException e) {
-                this.log.warn("Unable to update zh-CN language file: "+e);
-            }
-        }
+        try {
+            String content = java.nio.file.Files.readString(langFile.toPath());
 
-        // fr-FR
-        File frFR = new File(this.plugin.getDataFolder() + File.separator + "language" + File.separator + "fr-FR.yml");
-        if (!frFR.exists()) {
-            this.plugin.saveResource("language/fr-FR.yml", true);
-        } else {
-            try {
-                ConfigUpdater.update(plugin, "language/fr-FR.yml", frFR);
-            } catch (IOException e) {
-                this.log.warn("Unable to update fr-FR language file: "+e);
+            if (content.contains("{{") || content.contains("}}") || content.contains("§")) {
+                this.log.info("Detected legacy placeholders and/or colour codes in " + language + ".yml. Reloading file...");
+                this.plugin.saveResource(resourcePath, true);
+            } else {
+                ConfigUpdater.update(this.plugin, resourcePath, langFile);
             }
-        }
-
-        // es-ES
-        File esES = new File(this.plugin.getDataFolder() + File.separator + "language" + File.separator + "es-ES.yml");
-        if (!esES.exists()) {
-            this.plugin.saveResource("language/es-ES.yml", true);
-        } else {
-            try {
-                ConfigUpdater.update(plugin, "language/es-ES.yml", frFR);
-            } catch (IOException e) {
-                this.log.warn("Unable to update es-ES language file: "+e);
-            }
-        }
-
-        // ko-KR
-        File koKR = new File(this.plugin.getDataFolder() + File.separator + "language" + File.separator + "ko-KR.yml");
-        if (!koKR.exists()) {
-            this.plugin.saveResource("language/ko-KR.yml", true);
-        } else {
-            try {
-                ConfigUpdater.update(plugin, "language/ko-KR.yml", frFR);
-            } catch (IOException e) {
-                this.log.warn("Unable to update ko-KR language file: "+e);
-            }
+        } catch (IOException e) {
+            this.log.warn("Unable to process " + language + " language file: " + e.getMessage());
         }
     }
 
@@ -473,6 +449,59 @@ public class UtilUpdate {
             spawnsFile.close();
             spawnsFile.delete("data/spawns.yml");
             log.info("[1/1] Done.");
+        }
+    }
+
+    /**
+     * Scans the file for legacy § codes and converts them to MiniMessage tags.
+     * @param file The file to convert.
+     */
+    public void convertLegacyColors(File file) {
+        boolean modified = false;
+        List<String> lines = new ArrayList<>();
+
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line.contains("§")) {
+                    line = line.replace("§0", "<black>")
+                            .replace("§1", "<dark_blue>")
+                            .replace("§2", "<dark_green>")
+                            .replace("§3", "<dark_aqua>")
+                            .replace("§4", "<dark_red>")
+                            .replace("§5", "<dark_purple>")
+                            .replace("§6", "<gold>")
+                            .replace("§7", "<gray>")
+                            .replace("§8", "<dark_gray>")
+                            .replace("§9", "<blue>")
+                            .replace("§a", "<green>")
+                            .replace("§b", "<aqua>")
+                            .replace("§c", "<red>")
+                            .replace("§d", "<light_purple>")
+                            .replace("§e", "<yellow>")
+                            .replace("§f", "<white>")
+                            .replace("§l", "<bold>")
+                            .replace("§m", "<strikethrough>")
+                            .replace("§n", "<underlined>")
+                            .replace("§o", "<italic>")
+                            .replace("§r", "<reset>");
+                    modified = true;
+                }
+                lines.add(line);
+            }
+        } catch (FileNotFoundException e) {
+            return;
+        }
+
+        if (modified) {
+            this.log.info("Converting legacy color codes in config.yml to MiniMessage...");
+            try (PrintWriter writer = new PrintWriter(file)) {
+                for (String line : lines) {
+                    writer.println(line);
+                }
+            } catch (IOException e) {
+                this.log.warn("Failed to save converted config.yml: " + e.getMessage());
+            }
         }
     }
 }

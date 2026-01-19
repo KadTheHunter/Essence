@@ -1,5 +1,9 @@
 package net.lewmc.essence.chat;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.lewmc.essence.Essence;
 import net.lewmc.essence.core.UtilMessage;
 import net.lewmc.essence.core.UtilPlaceholder;
@@ -12,6 +16,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 /**
  * /msg command
@@ -50,13 +55,20 @@ public class CommandMsg extends FoundryCommand {
 
         if (args.length > 1) {
             for (Player p : Bukkit.getOnlinePlayers()) {
-                if ((p.getName().toLowerCase()).equalsIgnoreCase(args[0])) {
-                    if (cs instanceof ConsoleCommandSender || !new UtilPlayer(this.plugin).playerIsIgnoring(Bukkit.getPlayer(cs.getName()).getUniqueId(),p.getUniqueId())) {
-                        String msg = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+                if (p.getName().equalsIgnoreCase(args[0])) {
+                    UUID senderUUID = (cs instanceof Player lp) ? lp.getUniqueId() : null;
 
-                        msg = new UtilPlaceholder(this.plugin, cs).replaceAll(msg);
+                    if (cs instanceof ConsoleCommandSender || !new UtilPlayer(this.plugin).playerIsIgnoring(senderUUID, p.getUniqueId())) {
+                        String rawMsg = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+                        MiniMessage mm = MiniMessage.miniMessage();
 
-                        String[] repl = new String[] {cs.getName(), p.getName(), msg};
+                        Component msgComponent = (boolean) this.plugin.config.get("chat.allow-message-formatting")
+                                ? mm.deserialize(rawMsg)
+                                : mm.deserialize(rawMsg, TagResolver.empty());
+
+                        msgComponent = new UtilPlaceholder(this.plugin, cs).replaceAll(msgComponent);
+
+                        String[] repl = new String[] { cs.getName(), p.getName(), PlainTextComponentSerializer.plainText().serialize(msgComponent) };
 
                         message.send("msg", "send", repl);
                         message.sendTo(p, "msg", "send", repl);
@@ -70,7 +82,7 @@ public class CommandMsg extends FoundryCommand {
             }
             message.send("generic", "playernotfound");
         } else {
-            message.send("msg","usage");
+            message.send("msg", "usage");
         }
 
         return true;

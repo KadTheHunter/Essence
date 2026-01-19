@@ -1,5 +1,6 @@
 package net.lewmc.essence.core;
 
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.lewmc.essence.Essence;
 import net.lewmc.essence.teleportation.UtilLocation;
 import org.bukkit.event.EventHandler;
@@ -31,7 +32,7 @@ public class EventLeave implements Listener {
 
         UtilPlaceholder tag = new UtilPlaceholder(this.plugin, event.getPlayer());
         if (this.plugin.config.get("chat.broadcasts.leave") instanceof String) {
-            event.setQuitMessage(tag.replaceAll((String) this.plugin.config.get("chat.broadcasts.leave")));
+            event.quitMessage(tag.replaceAll(MiniMessage.miniMessage().deserialize((String) this.plugin.config.get("chat.broadcasts.leave"))));
         }
 
         UtilPlayer up = new UtilPlayer(this.plugin);
