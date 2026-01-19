@@ -1,6 +1,7 @@
 package net.lewmc.essence;
 
 import com.tchristofferson.configupdater.ConfigUpdater;
+import net.lewmc.essence.core.UtilUpdate;
 import net.lewmc.foundry.Files;
 import net.lewmc.foundry.Logger;
 
@@ -60,6 +61,15 @@ public class EssenceConfiguration {
         File configFile = new File(this.plugin.getDataFolder(), "config.yml");
 
         try {
+            if (configFile.exists() && java.nio.file.Files.readString(configFile.toPath()).contains("§")) {
+                new UtilUpdate(this.plugin).convertLegacyColors(configFile);
+            }
+        } catch (IOException e) {
+            this.plugin.log.warn("Unable to convert legacy color codes in config.yml: "+e);
+            this.plugin.log.warn("If you have any errors in the future, check you config file does not contain any legacy color codes (§ codes).");
+        }
+
+        try {
             ConfigUpdater.update(plugin, "config.yml", configFile);
         } catch (IOException e) {
             this.log.warn("Unable to update configuration: "+e);
@@ -96,10 +106,10 @@ public class EssenceConfiguration {
         putBoolean("chat.enabled", (boolean) getValue("chat.enabled", true, Boolean.class));
         putString("chat.name-format", (String) getValue("chat.name-format", "%essence_combined_prefix% %essence_player%%essence_player_suffix%:", String.class));
         putBoolean("chat.allow-message-formatting", (boolean) getValue("chat.allow-message-formatting", true, Boolean.class));
-        putObject("chat.broadcasts.first-join", getValue("chat.broadcasts.first-join", "§a%essence_player% joined the server for the first time!", String.class, Boolean.class));
-        putObject("chat.broadcasts.join", getValue("chat.broadcasts.join", "§e%essence_player% joined the server!", String.class, Boolean.class));
-        putObject("chat.broadcasts.leave", getValue("chat.broadcasts.leave", "§c%essence_player% left the server!", String.class, Boolean.class));
-        putObject("chat.motd", getValue("chat.motd", "§2§lWelcome to the server!", String.class, Boolean.class));
+        putObject("chat.broadcasts.first-join", getValue("chat.broadcasts.first-join", "<green>%essence_player% joined the server for the first time!", String.class, Boolean.class));
+        putObject("chat.broadcasts.join", getValue("chat.broadcasts.join", "<yellow>%essence_player% joined the server!", String.class, Boolean.class));
+        putObject("chat.broadcasts.leave", getValue("chat.broadcasts.leave", "<red>%essence_player% left the server!", String.class, Boolean.class));
+        putObject("chat.motd", getValue("chat.motd", "<blue><bold>Welcome to the server!", String.class, Boolean.class));
         putBoolean("chat.manage-chat", (boolean) getValue("chat.manage-chat", true, Boolean.class));
 
         putBoolean("economy.enabled", (boolean) getValue("economy.enabled", true, Boolean.class));
@@ -258,18 +268,17 @@ public class EssenceConfiguration {
             this.log.warn("Config > Value '" + key + "' had invalid type.");
             this.log.warn("Config > Value '" + key + "' was reset to '" + defaultValue + "'.");
             this.log.warn("Config > Please double-check your configuration is correct.");
-            return defaultValue;
         } else {
             this.changesMade = true;
             this.configFile.set(key, defaultValue);
             this.log.warn("Config > Value '"+key+"' did not exist in the config file.");
             this.log.warn("Config > Value '"+key+"' was reset to '"+defaultValue+"'.");
-            return defaultValue;
         }
+        return defaultValue;
     }
 
     /**
-     * Logs the new config file to console if verbose mode is enabled.
+     * Logs the new config file to the console if verbose mode is enabled.
      *
      * @param key String - The key
      * @since 1.10.1

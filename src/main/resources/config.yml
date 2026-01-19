@@ -12,12 +12,12 @@ chat:
   name-format: "%essence_combined_prefix% %essence_player%%essence_player_suffix%:"
   allow-message-formatting: false
   broadcasts:
-    first-join: "§a%essence_player% joined the server for the first time!"
-    join: "§e%essence_player% joined the server!"
-    leave: "§c%essence_player% left the server!"
+    first-join: "<green>%essence_player% joined the server for the first time!"
+    join: "<yellow>%essence_player% joined the server!"
+    leave: "<red>%essence_player% left the server!"
   motd: |-
-    §2§lWelcome to the server!
-    §aYou can change this message in Essence's config.yml
+    <blue><bold>Welcome to the server!
+    <green>You can change this message in Essence's config.yml
   manage-chat: true
 
 # ECONOMY MODULE

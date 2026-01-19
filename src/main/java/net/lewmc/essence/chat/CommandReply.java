@@ -1,5 +1,8 @@
 package net.lewmc.essence.chat;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.lewmc.essence.Essence;
 import net.lewmc.essence.core.UtilMessage;
 import net.lewmc.essence.core.UtilPlaceholder;
@@ -7,9 +10,7 @@ import net.lewmc.essence.core.UtilPlayer;
 import net.lewmc.foundry.command.FoundryCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-
-import java.util.Arrays;
+import org.bukkit.entity.Player;
 
 /**
  * /reply command.
@@ -51,35 +52,37 @@ public class CommandReply extends FoundryCommand {
                 CommandSender p = this.plugin.msgHistory.get(cs);
 
                 boolean canSend = true;
-                if (!(cs instanceof ConsoleCommandSender) && cs instanceof org.bukkit.entity.Player sender && p instanceof org.bukkit.entity.Player target) {
-                    UtilPlayer up = new UtilPlayer(this.plugin);
-                    canSend = !up.playerIsIgnoring(target.getUniqueId(), sender.getUniqueId());
+                if (cs instanceof Player sender && p instanceof Player target) {
+                    canSend = !new UtilPlayer(this.plugin).playerIsIgnoring(target.getUniqueId(), sender.getUniqueId());
                 }
 
                 if (canSend) {
-                    String msg = String.join(" ", Arrays.copyOfRange(args, 0, args.length));
+                    String rawMsg = String.join(" ", args);
+                    MiniMessage mm = MiniMessage.miniMessage();
 
-                    String[] repl = new String[]{cs.getName(), p.getName(), new UtilPlaceholder(this.plugin, cs).replaceAll(msg)};
+                    Component msgComponent = (boolean) this.plugin.config.get("chat.allow-message-formatting")
+                            ? mm.deserialize(rawMsg)
+                            : mm.deserialize(rawMsg, TagResolver.empty());
+
+                    msgComponent = new UtilPlaceholder(this.plugin, cs).replaceAll(msgComponent);
+
+                    String processedMsg = mm.serialize(msgComponent);
+
+                    String[] repl = new String[]{cs.getName(), p.getName(), processedMsg};
                     message.send("msg", "send", repl);
                     message.sendTo(p, "msg", "send", repl);
 
-                    if (this.plugin.msgHistory.containsKey(p)) {
-                        this.plugin.msgHistory.replace(p, cs);
-                    } else {
-                        this.plugin.msgHistory.put(p, cs);
-                    }
+                    this.plugin.msgHistory.put(p, cs);
                 } else {
                     message.send("ignore", "cantmessage", new String[]{p.getName()});
                 }
             } else {
                 message.send("reply", "none");
             }
-
             return true;
-        } else {
-            message.send("reply","usage");
         }
 
+        message.send("reply", "usage");
         return true;
     }
 }

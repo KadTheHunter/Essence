@@ -2,7 +2,6 @@ package net.lewmc.essence.chat;
 
 import net.lewmc.essence.core.UtilMessage;
 import net.lewmc.essence.Essence;
-import net.lewmc.essence.core.UtilPlaceholder;
 import net.lewmc.foundry.command.FoundryCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -45,7 +44,7 @@ public class CommandBroadcast extends FoundryCommand {
         if (args.length > 0) {
             StringBuilder broadcastMessage = new StringBuilder();
             for (String arg : args) { broadcastMessage.append(arg).append(" "); }
-            msg.broadcast(new UtilPlaceholder(this.plugin, cs).replaceAll(broadcastMessage.toString()));
+            msg.broadcast(broadcastMessage);
         } else {
             msg.send("broadcast","usage");
         }

@@ -1,7 +1,6 @@
 package net.lewmc.essence.core;
 
 import net.lewmc.essence.Essence;
-import net.lewmc.foundry.Logger;
 import net.lewmc.foundry.command.FoundryCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -42,16 +41,14 @@ public class CommandRules extends FoundryCommand {
         UtilMessage msg = new UtilMessage(this.plugin, cs);
         try (BufferedReader br = new BufferedReader(new FileReader(this.plugin.getDataFolder() + File.separator + "rules.txt"))) {
             String rule;
-            UtilPlaceholder pu = new UtilPlaceholder(this.plugin, cs);
             while ((rule = br.readLine()) != null) {
-                msg.send("other", "rule", new String[] {pu.replaceAll(rule)});
+                msg.send("other", "rule", new String[] {rule});
             }
         } catch (IOException e) {
-            Logger log = new Logger(this.plugin.foundryConfig);
             msg.send("generic", "exception");
-            log.severe("Unable to display rules.");
-            log.severe(e.getMessage());
-            log.severe(Arrays.toString(e.getStackTrace()));
+            this.plugin.log.severe("Unable to display rules.");
+            this.plugin.log.severe(e.getMessage());
+            this.plugin.log.severe(Arrays.toString(e.getStackTrace()));
         }
         return true;
     }

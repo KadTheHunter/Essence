@@ -148,7 +148,7 @@ public class Essence extends JavaPlugin {
         update.migrate();
         this.startupConfig();
         update.VersionCheck();
-        update.UpdateLanguage();
+        update.UpdateLanguages();
 
         if (this.verbose) {
             this.log.warn("Verbose mode is ENABLED.");

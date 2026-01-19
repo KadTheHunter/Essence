@@ -1,16 +1,16 @@
 package net.lewmc.essence.chat;
 
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.lewmc.essence.Essence;
 import net.lewmc.essence.core.UtilPlaceholder;
 import net.lewmc.essence.core.UtilPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-
-import java.util.List;
 
 /**
  * PlayerChatEvent fires when a player sends a message in chat.
@@ -28,30 +28,33 @@ public class EventPlayerChat implements Listener {
 
     /**
      * Fires when a player sends a message in chat.
-     * @param event The AsyncPlayerChatEvent event.
+     * @param event The AsyncChatEvent event.
      */
     @EventHandler
-    public void onPlayerChat(AsyncPlayerChatEvent event) {
-        if ((boolean) this.plugin.config.get("chat.manage-chat")) {
-            String msg = new UtilPlaceholder(this.plugin, event.getPlayer()).replaceAll(this.plugin.config.get("chat.name-format") + " " + event.getMessage());
+    public void onPlayerChat(AsyncChatEvent event) {
+        if (!(boolean) this.plugin.config.get("chat.manage-chat")) return;
 
-            if ((boolean) this.plugin.config.get("chat.allow-message-formatting")) {
-                msg = ChatColor.translateAlternateColorCodes('&', msg);
+        Player player = event.getPlayer();
+        MiniMessage mm = MiniMessage.miniMessage();
+        UtilPlayer up = new UtilPlayer(this.plugin);
+
+        event.viewers().removeIf(audience -> {
+            if (audience instanceof Player recipient) {
+                return up.playerIsIgnoring(recipient.getUniqueId(), player.getUniqueId());
             }
+            return false;
+        });
 
-            // Escape %
-            msg = msg.replace("%", "%%");
+        String rawMsg = PlainTextComponentSerializer.plainText().serialize(event.originalMessage());
+        Component messageContent = (boolean) this.plugin.config.get("chat.allow-message-formatting")
+                ? mm.deserialize(rawMsg)
+                : Component.text(rawMsg);
 
-            event.setMessage(msg);
-            event.setFormat(msg);
+        String format = this.plugin.config.get("chat.name-format") + " <user_message>";
 
-            for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                List<String> ignoring = (List<String>) new UtilPlayer(this.plugin).getPlayer(p.getUniqueId(), UtilPlayer.KEYS.USER_IGNORING_PLAYERS);
-                if (!ignoring.contains(p.getUniqueId().toString())) {
-                    p.sendMessage(msg);
-                }
-            }
-            event.setCancelled(true);
-        }
-    }
-}
+        final Component finalChatLine = new UtilPlaceholder(this.plugin, player).replaceAll(
+                mm.deserialize(format, Placeholder.component("user_message", messageContent))
+        );
+
+        event.renderer((source, sourceDisplayName, message, viewer) -> finalChatLine);
+    }}
