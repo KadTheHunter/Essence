@@ -402,19 +402,12 @@ public class UtilTeam {
      * @return boolean - If the players are in the same team.
      */
     public boolean areTeammates(Player p1, Player p2) {
-        Files p1data = new Files(this.plugin.foundryConfig, this.plugin);
-        p1data.load(p1data.playerDataFile(p1));
-        if (p1data.getString("user.team") == null) { return false; }
-        String p1team = p1data.getString("user.team");
-        p1data.close();
+        UtilPlayer up = new UtilPlayer(this.plugin);
 
-        Files p2data = new Files(this.plugin.foundryConfig, this.plugin);
-        p2data.load(p2data.playerDataFile(p2));
-        if (p2data.getString("user.team") == null) { return false; }
-        String p2team = p2data.getString("user.team");
-        p2data.close();
+        if (up.getPlayer(p1.getUniqueId(), UtilPlayer.KEYS.USER_TEAM) == null) { return false; }
+        if (up.getPlayer(p2.getUniqueId(), UtilPlayer.KEYS.USER_TEAM) == null) { return false; }
 
-        return (p1team.equalsIgnoreCase(p2team));
+        return up.getPlayer(p1.getUniqueId(), UtilPlayer.KEYS.USER_TEAM).toString().equalsIgnoreCase((String) up.getPlayer(p2.getUniqueId(), UtilPlayer.KEYS.USER_TEAM).toString());
     }
 
     /**
