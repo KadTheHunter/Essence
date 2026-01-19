@@ -268,14 +268,13 @@ public class EssenceConfiguration {
             this.log.warn("Config > Value '" + key + "' had invalid type.");
             this.log.warn("Config > Value '" + key + "' was reset to '" + defaultValue + "'.");
             this.log.warn("Config > Please double-check your configuration is correct.");
-            return defaultValue;
         } else {
             this.changesMade = true;
             this.configFile.set(key, defaultValue);
             this.log.warn("Config > Value '"+key+"' did not exist in the config file.");
             this.log.warn("Config > Value '"+key+"' was reset to '"+defaultValue+"'.");
-            return defaultValue;
         }
+        return defaultValue;
     }
 
     /**
