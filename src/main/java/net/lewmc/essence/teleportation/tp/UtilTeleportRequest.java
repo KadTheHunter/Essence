@@ -112,14 +112,14 @@ public class UtilTeleportRequest {
             tpu.doTeleport(
                     this.plugin.getServer().getPlayer(requested),
                     this.plugin.getServer().getPlayer(requesterName).getLocation(),
-                    (int) this.plugin.config.get("teleportation.requests.delay"),
+                    (int) this.plugin.config.get("teleportation.requests.wait"),
                     true
             );
         } else {
             tpu.doTeleport(
                     this.plugin.getServer().getPlayer(requesterName),
                     this.plugin.getServer().getPlayer(requested).getLocation(),
-                    (int) this.plugin.config.get("teleportation.requests.delay"),
+                    (int) this.plugin.config.get("teleportation.requests.wait"),
                     true
             );
         }
