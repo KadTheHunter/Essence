@@ -125,6 +125,7 @@ public class EssenceConfiguration {
 
         putBoolean("kit.enabled", (boolean) getValue("kit.enabled", true, Boolean.class));
         putStringList("kit.spawn-kits", (List<String>) getValue("kit.spawn-kits", List.of("wooden-tools"), List.class));
+        putBoolean("kit.allow-unsafe-enchantments", (boolean) getValue("kit.allow-unsafe-enchantments", false, Boolean.class));
 
         putBoolean("stats.enabled", (boolean) getValue("stats.enabled", true, Boolean.class));
 

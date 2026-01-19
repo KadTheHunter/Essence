@@ -44,6 +44,7 @@ kit:
   enabled: true
   spawn-kits:
     - wooden-tools
+  allow-unsafe-enchantments: false
 
 # STATS MODULE
 stats:

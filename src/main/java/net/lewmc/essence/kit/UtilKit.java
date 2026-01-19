@@ -99,12 +99,25 @@ public class UtilKit {
             List<String> enchantments = kitData.getStringList("kits."+kit+".items."+object+".enchantments");
             for (String enchantment : enchantments) {
                 String[] e = enchantment.split(":");
-                Enchantment parsedEnchantment = Enchantment.getByKey(NamespacedKey.fromString(e[0]));
+                if (e.length != 2) {
+                    this.plugin.log.warn("Invalid enchantment format '" + enchantment + "' in kit '" + kit + "'");
+                    continue;
+                }
 
-                if (parsedEnchantment != null) {
-                    itemStack.addEnchantment(parsedEnchantment, Integer.parseInt(e[1]));
-                } else {
-                    this.plugin.log.warn("Unable to parse enchantment '"+enchantment+"' in kit '"+kit+"'");
+                Enchantment ench = Enchantment.getByKey(NamespacedKey.minecraft(e[0].toLowerCase()));
+                if (ench == null) {
+                    this.plugin.log.warn("Unable to parse enchantment '" + e[0] + "' level '" + e[1] + "' in kit '" + kit + "'");
+                    continue;
+                }
+
+                try {
+                    if ((boolean) this.plugin.config.get("kit.allow-unsafe-enchantments")) {
+                        itemStack.addUnsafeEnchantment(ench, Integer.parseInt(e[1]));
+                    } else {
+                        itemStack.addEnchantment(ench, Integer.parseInt(e[1]));
+                    }
+                } catch (NumberFormatException ex) {
+                    this.plugin.log.warn("Invalid enchantment level '" + e[1] + "' for enchantment '" + e[0] + "' in kit '" + kit + "'");
                 }
             }
 
