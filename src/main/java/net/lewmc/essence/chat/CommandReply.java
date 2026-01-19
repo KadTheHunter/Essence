@@ -3,7 +3,6 @@ package net.lewmc.essence.chat;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.lewmc.essence.Essence;
 import net.lewmc.essence.core.UtilMessage;
 import net.lewmc.essence.core.UtilPlaceholder;
@@ -59,14 +58,15 @@ public class CommandReply extends FoundryCommand {
 
                 if (canSend) {
                     String rawMsg = String.join(" ", args);
+                    MiniMessage mm = MiniMessage.miniMessage();
 
                     Component msgComponent = (boolean) this.plugin.config.get("chat.allow-message-formatting")
-                            ? MiniMessage.miniMessage().deserialize(rawMsg)
-                            : MiniMessage.miniMessage().deserialize(rawMsg, TagResolver.empty());
+                            ? mm.deserialize(rawMsg)
+                            : mm.deserialize(rawMsg, TagResolver.empty());
 
                     msgComponent = new UtilPlaceholder(this.plugin, cs).replaceAll(msgComponent);
 
-                    String processedMsg = PlainTextComponentSerializer.plainText().serialize(msgComponent);
+                    String processedMsg = mm.serialize(msgComponent);
 
                     String[] repl = new String[]{cs.getName(), p.getName(), processedMsg};
                     message.send("msg", "send", repl);

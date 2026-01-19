@@ -3,7 +3,6 @@ package net.lewmc.essence.chat;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.lewmc.essence.Essence;
 import net.lewmc.essence.core.UtilMessage;
 import net.lewmc.essence.core.UtilPlaceholder;
@@ -68,7 +67,9 @@ public class CommandMsg extends FoundryCommand {
 
                         msgComponent = new UtilPlaceholder(this.plugin, cs).replaceAll(msgComponent);
 
-                        String[] repl = new String[] { cs.getName(), p.getName(), PlainTextComponentSerializer.plainText().serialize(msgComponent) };
+                        String formattedMsg = mm.serialize(msgComponent);
+
+                        String[] repl = new String[] { cs.getName(), p.getName(), formattedMsg };
 
                         message.send("msg", "send", repl);
                         message.sendTo(p, "msg", "send", repl);

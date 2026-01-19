@@ -18,7 +18,7 @@ public class UtilTeleportRequest {
 
     /**
      * Constructor for the TeleportRequestUtil class.
-     * @param plugin Reference to main Essence class.
+     * @param plugin Reference to the main Essence class.
      */
     public UtilTeleportRequest(Essence plugin) {
         this.plugin = plugin;
@@ -108,6 +108,7 @@ public class UtilTeleportRequest {
         Player requesterPlayer = this.plugin.getServer().getPlayer(requesterName);
         
         UtilTeleport tpu = new UtilTeleport(this.plugin);
+
         if (Objects.equals(tpaRequest[1], "true")) {
             tpu.doTeleport(
                     this.plugin.getServer().getPlayer(requested),
@@ -125,7 +126,15 @@ public class UtilTeleportRequest {
         }
 
         if (requesterPlayer != null) {
-            new UtilMessage(this.plugin, requesterPlayer).send("teleport", "requestaccepted", new String[]{requested});
+            new UtilMessage(this.plugin, this.plugin.getServer().getPlayer(requested)).send("teleport", "requestaccepted", new String[]{requested});
+            UtilMessage msg = new UtilMessage(this.plugin, requesterPlayer);
+            if ((int) this.plugin.config.get("teleportation.requests.wait") > 0) {
+                msg.send("teleport", "wait", new String[]{this.plugin.config.get("teleportation.requests.wait").toString()});
+                if ((boolean) this.plugin.config.get("teleportation.move-to-cancel")) {
+                }
+            } else {
+                msg.send("teleport", "requestaccepted", new String[]{requested});
+            }
         }
 
         this.deleteFromRequested(requested);

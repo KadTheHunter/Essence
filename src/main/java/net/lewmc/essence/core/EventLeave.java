@@ -3,6 +3,7 @@ package net.lewmc.essence.core;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.lewmc.essence.Essence;
 import net.lewmc.essence.teleportation.UtilLocation;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -27,20 +28,25 @@ public class EventLeave implements Listener {
      */
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
-        UtilLocation locationUtil = new UtilLocation(this.plugin);
-        locationUtil.UpdateLastLocation(event.getPlayer());
+        Player p = event.getPlayer();
 
-        UtilPlaceholder tag = new UtilPlaceholder(this.plugin, event.getPlayer());
+        UtilLocation locationUtil = new UtilLocation(this.plugin);
+        locationUtil.UpdateLastLocation(p);
+
+        UtilPlaceholder tag = new UtilPlaceholder(this.plugin, p);
         if (this.plugin.config.get("chat.broadcasts.leave") instanceof String) {
             event.quitMessage(tag.replaceAll(MiniMessage.miniMessage().deserialize((String) this.plugin.config.get("chat.broadcasts.leave"))));
         }
 
         UtilPlayer up = new UtilPlayer(this.plugin);
-        if (!up.savePlayer(event.getPlayer().getUniqueId())) {
+        if (!up.savePlayer(p.getUniqueId())) {
             this.plugin.log.severe("Unable to save player data.");
-            this.plugin.log.warn("It wasn't possible to save "+event.getPlayer().getName()+"'s player data.");
+            this.plugin.log.warn("It wasn't possible to save "+p.getName()+"'s player data.");
             this.plugin.log.warn("The player data may be stale/outdated.");
         }
-        up.unloadPlayer(event.getPlayer().getUniqueId());
+        up.unloadPlayer(p.getUniqueId());
+
+        plugin.msgHistory.remove(p);
+        plugin.msgHistory.values().removeIf(value -> value.equals(p));
     }
 }
