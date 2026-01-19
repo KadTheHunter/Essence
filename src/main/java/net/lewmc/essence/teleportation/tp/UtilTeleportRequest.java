@@ -130,8 +130,6 @@ public class UtilTeleportRequest {
             UtilMessage msg = new UtilMessage(this.plugin, requesterPlayer);
             if ((int) this.plugin.config.get("teleportation.requests.wait") > 0) {
                 msg.send("teleport", "wait", new String[]{this.plugin.config.get("teleportation.requests.wait").toString()});
-                if ((boolean) this.plugin.config.get("teleportation.move-to-cancel")) {
-                }
             } else {
                 msg.send("teleport", "requestaccepted", new String[]{requested});
             }
