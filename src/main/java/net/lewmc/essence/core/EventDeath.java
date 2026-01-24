@@ -22,11 +22,13 @@ public class EventDeath implements Listener {
 
     /**
      * Event handler for when a player dies.
-     * @param event PlayerDeathEvent - Server thrown event.
+     * @param event PlayerDeathEvent - Server-thrown event.
      */
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         UtilLocation locationUtil = new UtilLocation(this.plugin);
         locationUtil.UpdateLastLocation(event.getPlayer());
+
+        this.plugin.teleportRequests.remove(event.getPlayer().getName());
     }
 }
