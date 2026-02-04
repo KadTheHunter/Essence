@@ -60,6 +60,8 @@ public class CommandFeed extends FoundryCommand {
      */
     private boolean feedSelf(Player p, UtilMessage msg) {
         p.setFoodLevel(20);
+        p.setSaturation(10);
+        p.setExhaustion(0F);
         msg.send("feed", "beenfed");
         return true;
     }
