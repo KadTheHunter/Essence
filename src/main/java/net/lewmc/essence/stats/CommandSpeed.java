@@ -43,7 +43,7 @@ public class CommandSpeed extends FoundryCommand {
     protected boolean onRun(CommandSender cs, Command command, String s, String[] args) {
         UtilMessage message = new UtilMessage(this.plugin, cs);
 
-        if (args.length == 1 || (args.length == 2 && (args[1].equalsIgnoreCase("fly") || args[1].equalsIgnoreCase("walk")))) {
+        if (args.length == 1 || (args.length == 2 && (args[1].equalsIgnoreCase("fly") || args[1].equalsIgnoreCase("walk") || args[1].equalsIgnoreCase("both")))) {
             if (cs instanceof Player p) {
                 return this.speedSelf(p, message, args);
             } else {
@@ -51,7 +51,7 @@ public class CommandSpeed extends FoundryCommand {
                 return true;
             }
         }
-        else if (args.length == 2 || (args.length == 3 && (args[2].equalsIgnoreCase("fly") || args[2].equalsIgnoreCase("walk")))) {
+        else if (args.length == 2 || (args.length == 3 && (args[2].equalsIgnoreCase("fly") || args[2].equalsIgnoreCase("walk") || args[2].equalsIgnoreCase("both")))) {
             return this.speedOther(new UtilPermission(this.plugin, cs), cs, message, args);
         } else {
             if (cs instanceof Player p) {
