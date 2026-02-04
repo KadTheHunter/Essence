@@ -99,7 +99,7 @@ public class CommandTeleport extends FoundryCommand {
             }
             for (Player t : targets) {
 
-                if (!tp.teleportToggleCheck(player, t)) {
+                if (!isSelf && !tp.teleportToggleCheck(player, t)) {
                     message.send("teleport", "requestsdisabled", new String[] { t.getName() });
                 } else {
                     Location loc = new Location(t.getWorld(), x, y, z);
