@@ -354,6 +354,12 @@ god:
   beenenabled: "<dark_green>[Essence] <green>God mode enabled."
   beendisabled: "<dark_green>[Essence] <green>God mode disabled."
   usage: "<dark_red>[Essence] <red>Usage: /god [player]"
+kill:
+  beenkilled: "<dark_green>[Essence] <green>You've been killed."
+  serverkilled: "<dark_green>[Essence] <green>You've been killed by a magical force."
+  killedby: "<dark_green>[Essence] <green>You've been killed by <1>!"
+  killed: "<dark_green>[Essence] <green>You killed <1>"
+  usage: "<dark_red>[Essence] <red>Usage: /kill [player]"
 visibility:
   invisible: "<dark_green>[Essence] <green>You are now invisible."
   visible: "<dark_green>[Essence] <green>You are now visible."

@@ -206,6 +206,7 @@ permissions:
       essence.stats.extinguish: true
       essence.stats.god: true
       essence.stats.enchant: true
+      essence.stats.kill: true
   essence.stats.heal:
     description: Allows you to heal yourself.
   essence.stats.feed:
@@ -224,6 +225,8 @@ permissions:
     description: Allows you to toggle god mode
   essence.stats.enchant:
     description: Allows you to enchant an item
+  essence.stats.kill:
+    description: Allows you to kill a player
   essence.stats.other.*:
     description: Allows players to manage other player's stats such as health and hunger.
     default: op
@@ -235,6 +238,7 @@ permissions:
       essence.stats.extinguish.other: true
       essence.stats.god.other: true
       essence.stats.burn.other: true
+      essence.stats.kill.other: true
   essence.stats.heal.other:
     description: Allows you to heal other players.
   essence.stats.feed.other:
@@ -249,6 +253,8 @@ permissions:
     description: Allows you to toggle another player's god mode
   essence.stats.burn.other:
     description: Allows you to burn other players
+  essence.stats.kill.other:
+    description: Allows you to kill other players
   essence.home.*:
     description: Allows players to use the home system.
     default: op

@@ -38,6 +38,7 @@ public class ModuleStats extends FoundryModule {
         if (!this.cmd.isDisabled("extinguish")) { reg.runtimeCommand("extinguish", new CommandExtinguish((Essence) plugin), "ext"); }
         if (!this.cmd.isDisabled("god")) { reg.runtimeCommand("god", new CommandGod((Essence) plugin)); }
         if (!this.cmd.isDisabled("enchant")) { reg.runtimeCommand("enchant", new CommandEnchant((Essence) plugin)); }
+        if (!this.cmd.isDisabled("kill")) { reg.runtimeCommand("kill", new CommandKill((Essence) plugin), "suicide"); }
     }
 
     /**
