@@ -1,3 +1,6 @@
+# This is an orphaned fork; Lew has moved all his Minecraft projects including Essence to [git.pixelset.dev](https://git.pixelset.dev/LewMC). My PixelGit fork can be found [here](https://git.pixelset.dev/Kaddicus/Essence)
+
+
 ![Essence](https://cdn.modrinth.com/data/cached_images/1a9959eb6d98d5e50f561c021de086a8212cc7cc.png)
 
 - 💾 **Download Essence** - https://lewmc.net/plugin/essence
